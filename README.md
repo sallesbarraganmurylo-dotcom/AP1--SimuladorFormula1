@@ -108,4 +108,8 @@ Para usar: abra o Bruno, importe a pasta `bruno` como collection, configure o En
 
 ## Vídeo de demonstração
 
-🎥 [Link do vídeo de demonstração](COLOQUE_AQUI_O_LINK_DO_SEU_VIDEO)
+🎥 [Link do vídeo de demonstração]
+https://drive.google.com/file/d/1LYlCwD963FBDwnJ_Za7rSVb_LkaAX8oS/view?usp=drivesdk
+
+
+

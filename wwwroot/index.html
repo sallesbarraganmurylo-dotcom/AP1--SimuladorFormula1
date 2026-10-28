@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Fórmula 1 - Pilotos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-container">
+      <div class="logo">
+        <span class="f1-badge">F1</span>
+        <h1>Simulador de Fórmula 1</h1>
+      </div>
+      <p class="subtitle">Gerenciamento e Grid de Pilotos</p>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Caixa de Notificação / Mensagens -->
+    <div id="alert-box" class="alert-box hidden" role="alert">
+      <span id="alert-message"></span>
+      <button type="button" id="alert-close" class="alert-close" aria-label="Fechar mensagem">&times;</button>
+    </div>
+
+    <div class="content-grid">
+      <!-- Painel de Formulário: Cadastro e Edição -->
+      <section class="card form-card">
+        <div class="card-header">
+          <h2 id="form-title">Cadastrar Novo Piloto</h2>
+          <span id="form-mode-badge" class="badge badge-create">Modo Cadastro</span>
+        </div>
+
+        <form id="driver-form">
+          <input type="hidden" id="driver-id" value="">
+
+          <div class="form-group">
+            <label for="driver-titulo">Nome do Piloto *</label>
+            <input 
+              type="text" 
+              id="driver-titulo" 
+              placeholder="Ex: Ayrton Senna, Lewis Hamilton" 
+              required
+              autocomplete="off"
+              maxlength="100"
+            >
+            <small class="form-hint">Informe o nome completo ou de corrida do piloto.</small>
+          </div>
+
+          <div class="form-group" id="disponivel-group">
+            <label class="checkbox-label" for="driver-disponivel">
+              <input type="checkbox" id="driver-disponivel" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Piloto Disponível para Corrida</span>
+            </label>
+            <small class="form-hint" id="disponivel-hint">Pilotos recém-cadastrados iniciam como disponíveis.</small>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="form-submit-btn" class="btn btn-primary">
+              Cadastrar Piloto
+            </button>
+            <button type="button" id="form-cancel-btn" class="btn btn-secondary hidden">
+              Cancelar Edição
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Painel de Listagem de Pilotos -->
+      <section class="card list-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2>Grid de Pilotos</h2>
+            <span id="drivers-count" class="counter-badge">0 piloto(s)</span>
+          </div>
+          <button type="button" id="refresh-btn" class="btn btn-outline" title="Recarregar lista da API">
+            &#x21bb; Atualizar
+          </button>
+        </div>
+
+        <!-- Indicador de Carregamento -->
+        <div id="loading-spinner" class="loading-container hidden">
+          <div class="spinner"></div>
+          <span>Carregando dados da API...</span>
+        </div>
+
+        <!-- Tabela de Pilotos -->
+        <div class="table-responsive">
+          <table class="drivers-table" id="drivers-table">
+            <thead>
+              <tr>
+                <th style="width: 70px;">ID</th>
+                <th>Nome / Piloto</th>
+                <th style="width: 140px;">Status</th>
+                <th style="width: 160px;" class="text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="drivers-list">
+              <!-- Conteúdo renderizado via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mensagem de Lista Vazia -->
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🏁</div>
+          <h3>Nenhum piloto cadastrado</h3>
+          <p>Utilize o formulário ao lado para cadastrar o primeiro piloto no grid.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <p>ApiSimuladorFormula1 &bull; ASP.NET Core REST API &bull; Frontend HTML/CSS/JS Puro</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

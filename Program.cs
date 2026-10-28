@@ -1,66 +1,74 @@
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ApiDbContext>(opcoes =>
+    opcoes.UseSqlite("Data Source=formula1.db"));
+
 var app = builder.Build();
 
-var pilotos = new List<Pilotos>
+// Garante que o banco exista e esteja com as migrations aplicadas
+using (var escopo = app.Services.CreateScope())
 {
-    new Pilotos(1, "Lewis Hamilton", true),
-    new Pilotos(2, "Max Verstappen", false)
-};
+    var db = escopo.ServiceProvider.GetRequiredService<ApiDbContext>();
+    db.Database.Migrate();
+}
 
-app.MapGet("/", () => "Api Simulador de Corrida de Fórmula 1 está no ar!");
+// Serve o frontend (wwwroot/index.html) pela mesma origem da API
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-app.MapGet("/api/teams", () =>
+app.MapGet("/api/status", () => "Api Simulador de Corrida de Fórmula 1 está no ar!");
+
+app.MapGet("/api/drivers", async (ApiDbContext db) =>
 {
-    return Results.Ok(pilotos);
+    return Results.Ok(await db.Pilotos.ToListAsync());
 });
 
-app.MapGet("/api/drivers/{id:int}", (int id) =>
+app.MapGet("/api/drivers/{id:int}", async (int id, ApiDbContext db) =>
 {
-    var pilotoEncontrado = pilotos.Find(pilotoDaLista => pilotoDaLista.id == id);
-    if (pilotoEncontrado is null)
+    var piloto = await db.Pilotos.FindAsync(id);
+    return piloto is null ? Results.NotFound() : Results.Ok(piloto);
+});
+
+app.MapPost("/api/drivers", async (PilotoCriarDTO dados, ApiDbContext db) =>
+{
+    if (string.IsNullOrWhiteSpace(dados.Titulo))
+    {
+        return Results.BadRequest("O campo titulo é obrigatório.");
+    }
+
+    var piloto = new Piloto { Titulo = dados.Titulo, Disponivel = true };
+    db.Pilotos.Add(piloto);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/drivers/{piloto.Id}", piloto);
+});
+
+app.MapPut("/api/drivers/{id:int}", async (int id, PilotoAtualizarDTO dados, ApiDbContext db) =>
+{
+    var piloto = await db.Pilotos.FindAsync(id);
+    if (piloto is null)
     {
         return Results.NotFound();
     }
-    return Results.Ok(pilotoEncontrado);
+
+    piloto.Titulo = dados.Titulo;
+    piloto.Disponivel = dados.Disponivel;
+    await db.SaveChangesAsync();
+    return Results.Ok(piloto);
 });
 
-app.MapPost("/api/drivers", (PilotosDTO dados) =>
+app.MapDelete("/api/drivers/{id:int}", async (int id, ApiDbContext db) =>
 {
-    int proximoId = pilotos.Count + 1;
-    var novoPiloto = new Pilotos(proximoId, dados.titulo, true);
-    pilotos.Add(novoPiloto);
-    return Results.Created($"/api/drivers/{novoPiloto.id}", novoPiloto);
-});
-
-app.MapPut("/api/drivers/{id:int}", (int id, PilotosAtualizarDTO dados) =>
-{
-    int indice = pilotos.FindIndex(pilotosDaLista => pilotosDaLista.id == id);
-    if (indice == -1)
+    var piloto = await db.Pilotos.FindAsync(id);
+    if (piloto is null)
     {
         return Results.NotFound();
     }
-    var atualizado = new Pilotos(id, dados.titulo, dados.disponivel);
-    pilotos[indice] = atualizado;
-    return Results.Ok(atualizado);
-});
 
-app.MapDelete("/api/drivers/{id:int}", (int id) =>
-{
-    int indice = pilotos.FindIndex(pilotoDaLista => pilotoDaLista.id == id);
-    if (indice == -1)
-    {
-        return Results.NotFound();
-    }
-    pilotos.RemoveAt(indice);
+    db.Pilotos.Remove(piloto);
+    await db.SaveChangesAsync();
     return Results.NoContent();
 });
 
 app.Run();
-
-record Pilotos(int id, string titulo, bool disponivel);
-
-record PilotosDTO(string titulo);
-
-record PilotosAtualizarDTO(string titulo, bool disponivel);

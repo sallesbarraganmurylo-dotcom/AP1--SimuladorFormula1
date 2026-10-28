@@ -2,3 +2,8 @@ bin/
 obj/
 .vs/
 *.user
+
+# Banco SQLite local (cada pessoa gera o seu pelas migrations)
+*.db
+*.db-shm
+*.db-wal

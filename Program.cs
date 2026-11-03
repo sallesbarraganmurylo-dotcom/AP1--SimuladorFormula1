@@ -7,6 +7,23 @@ builder.Services.AddDbContext<ApiDbContext>(opcoes =>
 
 var app = builder.Build();
 
+// Aula 14: tratamento centralizado de exceções inesperadas.
+// Fica logo depois de Build() e antes dos outros middlewares e das rotas,
+// para envolver a execução dos endpoints.
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            mensagem = "Ocorreu um erro interno. Tente novamente mais tarde."
+        });
+    });
+});
+
 // Garante que o banco exista e esteja com as migrations aplicadas
 using (var escopo = app.Services.CreateScope())
 {
@@ -70,5 +87,8 @@ app.MapDelete("/api/drivers/{id:int}", async (int id, ApiDbContext db) =>
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
-
+app.MapGet("/api/teste-erro", () =>
+{
+    throw new InvalidOperationException("Falha simulada para teste.");
+});
 app.Run();

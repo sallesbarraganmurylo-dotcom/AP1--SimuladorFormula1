@@ -33,7 +33,6 @@ Depois do teste, a rota temporária foi removida do `Program.cs`.
 - Status: 200
 
 ## Teste de ID inexistente
-
 - Método: GET
 - Rota: `/api/drivers/999`
 - Status: 404. É um resultado previsto, e o middleware não o transformou em 500.
